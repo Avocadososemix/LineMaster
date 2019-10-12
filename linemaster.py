@@ -18,39 +18,32 @@ class LineMaster:
         self.irs = InfraredSensor()
 
     def forward(self, speed, time):
-        #self.left_motor.on_for_seconds(SpeedPercent(speed), time)
-        #self.right_motor.on_for_seconds(SpeedPercent(speed), time)
         self.both_motors.on_for_seconds(SpeedPercent(speed), SpeedPercent(speed), time) # speed 0-100
+#        ground = self.cs.value()
+#        if (ground > 20 or ground < 10) :
+#            self.forward(self, speed, time*1.2)
 
-    def turn (self, direction, speed, time):
-        if direction == "left":
+    def turn (self, speed, time):
+        ground = self.cs.value()
+        if ground > 20:
             while (self.cs.value() > 10):
                 print(self.cs.value)
-                self.both_motors.on_for_seconds(SpeedPercent(speed), SpeedPercent(speed/2), time) # speed 0-100
+                self.both_motors.on_for_seconds(SpeedPercent(speed), SpeedPercent(speed/6), time) # speed 0-100
                 # self.left_motor.on_for_seconds(SpeedPercent(speed), time)
-        if direction == "right":
+        if ground < 10:
             while (self.cs.value() < 20):
                 print(self.cs.value)
-                self.both_motors.on_for_seconds(SpeedPercent(speed/2), SpeedPercent(speed), time) # speed 0-100
+                self.both_motors.on_for_seconds(SpeedPercent(speed/6), SpeedPercent(speed), time) # speed 0-100
                 # self.right_motor.on_for_seconds(SpeedPercent(speed), time)
-
-    def turnDirection(self):
-        ground = self.cs.value()
-        if ground > 20 :
-            return "left"
-        elif ground < 10 :
-            return "right"
-        else:
-            return "false"
-
 
     def run(self):
         # mode and asserts
         self.cs.mode = 'COL-REFLECT'  # measure light intensity
+        self.both_motors.STOP_ACTION_COAST = 'coast'
         # self.irs.mode = 'US-DIST-CM' # distance
 
         while not self.shut_down:
-            self.turn(self.turnDirection(), 25, 0.1)
+            self.turn(25, 0.1)
             self.forward(50, 0.1)
             print(self.cs.value())
             # time.sleep(0.1)
