@@ -19,7 +19,6 @@ class LineMaster:
         self.irs = InfraredSensor()
 
     def forward(self, speed, time):
-#        while (self.go_forward):
         self.both_motors.on_for_seconds(SpeedPercent(speed), SpeedPercent(speed), time) # speed 0-100
             # speed = math.floor(speed*1.2) : 100
             # time = time*1.2
@@ -43,28 +42,15 @@ class LineMaster:
     def boost(self, speed, time):
         self.both_motors.on_for_seconds(SpeedPercent(speed), SpeedPercent(speed), time)
 
-    def isItYellow(self):
-        self.cs.mode = 'COL-COLOR'
-        colorcode = self.cs.color()
-        print(colorcode)
-        self.cs.mode = 'COL-REFLECT'
-        if colorcode == 4:
-            return True
-        return False
-
     def run(self):
         self.cs.mode = 'COL-REFLECT'  # measure light intensity
         self.both_motors.STOP_ACTION_COAST = 'coast'
 
-        #self.boost(50, 3)
+        self.boost(50, 3)
 
         while not self.shut_down:
             self.turn(50, 0.1)
             self.forward(50, 0.1)
-            if self.isItYellow():
-                print("Yellow")
-            else:
-                print("not yellow")
             # print(self.cs.value())
 
 # Main function
