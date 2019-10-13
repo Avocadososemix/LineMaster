@@ -1,61 +1,33 @@
-#!/usr/bin/env python
-"""
-Simple remote control.
-The motors are controlled according to the following table.
-Motor port   Channel   Buttons
-----------   -------   -------
-    A           1        red
-    B           1        blue
-    C           2        red
-    D           2        blue
-The program is stopped by pressing the baecon button.
-"""
+# forked from: https://sites.google.com/site/ev3python/learn_ev3_python/remote-control
 
+from time import sleep
+from ev3dev.ev3 import *
 
-from ev3.ev3dev import Motor, NoSuchMotorError
-from ev3.lego import InfraredSensor
-from ev3.event_loop import EventLoop
+lmotor = LargeMotor('outB')
+rmotor = LargeMotor('outC')
 
-ir = InfraredSensor()
+# Connect remote control
+rc = RemoteControl()
 
+def roll(motor, direction):
+    def on_press(state):
+        if state:
+            # Roll when button is pressed
+            motor.run_forever(speed_sp=500*direction)
+        else:
+            # Stop otherwise
+            motor.stop(stop_action='brake')
+    return on_press
 
-motors = []
-for port in 'ABCD':
-    try:
-        motor = Motor(port=port)
-        motor.regulation_mode = False
-    except NoSuchMotorError:
-        motor = None
-    motors.append(motor)
+# Assign event handler to each of the remote buttons
+rc.on_red_up    = roll(lmotor, 1)
+rc.on_red_down  = roll(lmotor, -1)
+rc.on_blue_up   = roll(rmotor,  1)
+rc.on_blue_down = roll(rmotor, -1)
 
-buttons = [
-    (ir.REMOTE.RED_UP, ir.REMOTE.RED_DOWN),
-    (ir.REMOTE.BLUE_UP, ir.REMOTE.BLUE_DOWN),
-]
-
-def ir_changed(event):
-    for channel in range(2):
-        state = event.evaluation[channel]
-        if state == ir.REMOTE.BAECON_MODE_ON:
-            for m in motors:
-                if m is not None:
-                    m.stop()
-            loop.stop()
-        for button in range(2):
-            n = channel * 2 + button
-            motor = motors[channel * 2 + button]
-            if not motor:
-                pass
-            elif state == buttons[button][0]:
-                motor.run_forever(50)
-            elif state == buttons[button][1]:
-                motor.run_forever(-50)
-            else:
-                motor.stop()
-
-
-loop = EventLoop()
-loop.register_value_change(getter=lambda: ir.remote, 
-                           startvalue=ir.remote,
-                           target=ir_changed)
-loop.start()
+# Enter event processing loop
+#while not button.any():   #not working so commented out
+while True:   #replaces previous line so use Ctrl-C to exit
+    rc.process()
+    sleep(0.01)
+# Press Ctrl-C to exit
