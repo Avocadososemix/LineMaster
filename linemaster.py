@@ -40,32 +40,32 @@ class LineMaster:
                 self.both_motors.on_for_seconds(SpeedPercent(speed/6), SpeedPercent(speed), time) # speed 0-100
                 # self.right_motor.on_for_seconds(SpeedPercent(speed), time)
 
-#    def go_left(self)
-#        if self.cs.value() > 20:
-#            return True
-#        return False
-#
-#    def go_right()
-#        if self.cs.value() > 10:
-#            return True
-#        return False
-#
-#    def go_forward():
-#        ground = self.cs.value()
-#        if (ground <= 20 and ground >= 10):
-#            return True
-#        return False
+    def boost(self, speed, time):
+        self.both_motors.on_for_seconds(SpeedPercent(speed), SpeedPercent(speed), time)
+
+    def isItYellow(self):
+        self.cs.mode = 'COL-COLOR'
+        colorcode = self.cs.color()
+        print(colorcode)
+        self.cs.mode = 'COL-REFLECT'
+        if colorcode == 4:
+            return True
+        return False
 
     def run(self):
-        # mode and asserts
         self.cs.mode = 'COL-REFLECT'  # measure light intensity
         self.both_motors.STOP_ACTION_COAST = 'coast'
-        # self.irs.mode = 'US-DIST-CM' # distance
+
+        #self.boost(50, 3)
 
         while not self.shut_down:
             self.turn(50, 0.1)
             self.forward(50, 0.1)
-            print(self.cs.value())
+            if self.isItYellow():
+                print("Yellow")
+            else:
+                print("not yellow")
+            # print(self.cs.value())
 
 # Main function
 if __name__ == "__main__":
