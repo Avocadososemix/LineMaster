@@ -27,11 +27,13 @@ class InfraMaster:
         self.turn(speed/2, time)
         self.forward(speed, time)
 
-        if distance < 10:
-            while distance < 10:
+
+        if distance < 20:
+            while distance < 20:
                 print("help, is an obstacle")
                 self.both_motors.on_for_seconds(SpeedPercent(speed), SpeedPercent(0), time)
                 distance = self.irs.value()
+            self.forward(speed, time)
   
     def turn (self, speed, time):
         ground = self.cs.value()

@@ -17,26 +17,36 @@ class LineMaster:
         self.both_motors = MoveTank('outB', 'outC')
         self.cs = ColorSensor()
         self.irs = InfraredSensor()
+        self.ts = TouchSensor()
 
     def forward(self, speed, time):
         self.both_motors.on_for_seconds(SpeedPercent(speed), SpeedPercent(speed), time) # speed 0-100
             # speed = math.floor(speed*1.2) : 100
             # time = time*1.2
 
+    def forwardpro(self, speed):
+        # print(self.cs.value)
+        self.both_motors.run_forever(speed_sp=SpeedPercent(speed))
+        while True:
+            ground = self.cs.value()
+            if (ground > 40 or ground < 27):
+                self.both_motors.stop(stop_action='brake')
+            break
+
     def turn (self, speed, time):
         ground = self.cs.value()
-        if ground > 20:
-            while (self.cs.value() > 10):
-                print(self.cs.value)
+        if ground > 30:
+            while (self.cs.value() > 30):
+                # print(self.cs.value)
                 # speed = math.floor(speed*1.2) : 100
                 # time = time*1.2
-                self.both_motors.on_for_seconds(SpeedPercent(speed), SpeedPercent(speed/6), time) # speed 0-100
-        if ground < 10:
-            while (self.cs.value() < 20):
-                print(self.cs.value)
+                self.both_motors.on_for_seconds(SpeedPercent(speed), SpeedPercent(-speed/3), time) # speed 0-100
+        if ground < 30:
+            while (self.cs.value() < 30):
+                # print(self.cs.value)
                 # speed = math.floor(speed*1.2) : 100
                 # time = time*1.2
-                self.both_motors.on_for_seconds(SpeedPercent(speed/6), SpeedPercent(speed), time) # speed 0-100
+                self.both_motors.on_for_seconds(SpeedPercent(-speed/3), SpeedPercent(speed), time) # speed 0-100
                 # self.right_motor.on_for_seconds(SpeedPercent(speed), time)
 
     def boost(self, speed, time):
@@ -46,14 +56,16 @@ class LineMaster:
         self.cs.mode = 'COL-REFLECT'  # measure light intensity
         self.both_motors.STOP_ACTION_COAST = 'coast'
 
-        self.boost(50, 3)
+        self.boost(50, 7)
 
         while not self.shut_down:
             self.turn(50, 0.1)
+            # self.forwardpro(50)
             self.forward(50, 0.1)
-            # print(self.cs.value())
+            print(self.cs.value())
 
 # Main function
 if __name__ == "__main__":
+    print("hello")
     robot = LineMaster()
     robot.run()
